@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แดชบอร์ดสรุปภาระงานสอน วิทยาศาสตร์และเทคโนโลยี</title>
+    
+    <!-- Fonts: Prompt for Thai language support -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#10b981',
+                        dark: '#1e293b'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- React & ReactDOM (UMD versions for in-browser usage) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for compiling JSX in browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body { background-color: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Animation for modal */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-overlay { animation: fadeIn 0.2s ease-out; }
+        .modal-content { animation: slideUp 0.3s ease-out; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // ข้อมูลจำลองที่สกัดมาจากไฟล์ PDF (สามารถแก้ไขเพิ่มเติมได้ง่ายๆ ตามรูปแบบนี้)
+        const teachersData = [
+            {
+                id: 1,
+                name: "นางสาวเพ็ญพักตร์ วงศ์ศรีชา",
+                totalCredits: 18,
+                totalPeriods: 25,
+                subjects: [
+                    { code: "ว21103", name: "วิทยาศาสตร์พื้นฐาน 2", credits: 1.5, classes: "ม.1/1-1/6", periods: 18 }
+                ],
+                activities: [
+                    { name: "กิจกรรมแนะแนว", target: "ม.1", periods: 1 },
+                    { name: "กิจกรรมลูกเสือ", target: "ม.ต้น", periods: 1 },
+                    { name: "ชุมนุมวิชาการ", target: "ม.ต้น", periods: 1 },
+                    { name: "PLC", target: "ม.ต้น", periods: 2 },
+                    { name: "โฮมรูม", target: "ม.1", periods: 2 }
+                ]
+            },
+            {
+                id: 2,
+                name: "นายนัทธพงษ์ ศรีโรจน์",
+                totalCredits: 18,
+                totalPeriods: 25,
+                subjects: [
+                    { code: "ว22103", name: "วิทยาศาสตร์พื้นฐาน 4", credits: 1.5, classes: "ม.2/1-2/6", periods: 18 }
+                ],
+                activities: [
+                    { name: "กิจกรรมแนะแนว", target: "ม.2", periods: 1 },
+                    { name: "กิจกรรมลูกเสือ", target: "ม.ต้น", periods: 1 },
+                    { name: "ชุมนุมวิชาการ", target: "ม.ต้น", periods: 1 },
+                    { name: "PLC", target: "ม.ต้น", periods: 2 },
+                    { name: "โฮมรูม", target: "ม.2", periods: 2 }
+                ]
+            },
+            {
+                id: 3,
+                name: "นางสาวปริศนา ทีระฆัง",
+                totalCredits: 18,
+                totalPeriods: 25,
+                subjects: [
+                    { code: "ว23103", name: "วิทยาศาสตร์พื้นฐาน 6", credits: 1.5, classes: "ม.3/1-3/6", periods: 18 }
+                ],
+                activities: [
+                    { name: "กิจกรรมแนะแนว", target: "ม.3", periods: 1 },
+                    { name: "กิจกรรมลูกเสือ", target: "ม.ต้น", periods: 1 },
+                    { name: "ชุมนุมวิชาการ", target: "ม.ต้น", periods: 1 },
+                    { name: "PLC", target: "ม.ต้น", periods: 2 },
+                    { name: "โฮมรูม", target: "ม.3", periods: 2 }
+                ]
+            },
+            {
+                id: 4,
+                name: "นางสาวนันทภัค แดงท่าขาม",
+                totalCredits: 22,
+                totalPeriods: 26,
+                subjects: [
+                    { code: "ว20202", name: "เทคนิคปฏิบัติการ", credits: 1.0, classes: "ม.1/3, 1/5", periods: 4 },
+                    { code: "ว232103", name: "วิทยาศาสตร์กายภาพ (ฟิสิกส์)", credits: 1.0, classes: "ม.5/1-5/3", periods: 6 },
+                    { code: "ว230204", name: "ฟิสิกส์ 4", credits: 1.5, classes: "ม.5/1-5/2", periods: 6 },
+                    { code: "ว130202", name: "การศึกษาด้วยตนเอง 2", credits: 1.0, classes: "ม.5/1-5/3", periods: 6 }
+                ],
+                activities: [
+                    { name: "กิจกรรมแนะแนว", target: "ม.ปลาย", periods: 1 },
+                    { name: "กิจกรรมบำเพ็ญประโยชน์", target: "ม.ปลาย", periods: 1 },
+                    { name: "ชุมนุมวิชาการ", target: "ม.ปลาย", periods: 1 },
+                    { name: "PLC", target: "ม.ปลาย", periods: 2 },
+                    { name: "โฮมรูม", target: "ม.ปลาย", periods: 2 }
+                ]
+            },
+            {
+                id: 5,
+                name: "นางณัฐกฤตา นนท์นาภา",
+                totalCredits: 16,
+                totalPeriods: 23,
+                subjects: [
+                    { code: "ว20204", name: "วิทยาศาสตร์ 2", credits: 1.0, classes: "ม.2/1, 2/4", periods: 4 },
+                    { code: "ว220206", name: "โครงงานวิทยาศาสตร์", credits: 2.0, classes: "ม.3/3", periods: 4 },
+                    { code: "ว20214", name: "วิทยาศาสตร์สิ่งแวดล้อม", credits: 1.0, classes: "ม.3/5", periods: 2 },
+                    { code: "ว120202", name: "การศึกษาด้วยตนเอง 2", credits: 1.0, classes: "ม.2/1-2/2", periods: 4 },
+                    { code: "ว20208", name: "วิทยาศาสตร์ทางการแพทย์ 2", credits: 1.0, classes: "ม.3/5", periods: 2 }
+                ],
+                activities: [
+                    { name: "กิจกรรมแนะแนว", target: "ม.ต้น", periods: 1 },
+                    { name: "กิจกรรมลูกเสือ", target: "ม.ต้น", periods: 1 },
+                    { name: "ชุมนุมวิชาการ", target: "ม.ต้น", periods: 1 },
+                    { name: "PLC", target: "ม.ต้น", periods: 2 },
+                    { name: "โฮมรูม", target: "ม.ต้น", periods: 2 }
+                ]
+            },
+            {
+                id: 6,
+                name: "นางสาวนารีนาฏ น้อยเภา",
+                totalCredits: 18,
+                totalPeriods: 25,
+                subjects: [
+                    { code: "ว30202", name: "ฟิสิกส์ 2", credits: 1.5, classes: "ม.4/1,4/2,4/4", periods: 9 },
+                    { code: "ว230206", name: "ฟิสิกส์ 6", credits: 1.5, classes: "ม.6/1,6/2", periods: 6 },
+                    { code: "ว230203", name: "ฟิสิกส์ 3", credits: 1.5, classes: "ม.6/5", periods: 3 }
+                ],
+                activities: [
+                    { name: "กิจกรรมแนะแนว", target: "ม.ปลาย", periods: 1 },
+                    { name: "กิจกรรมลูกเสือ", target: "ม.ปลาย", periods: 1 },
+                    { name: "ชุมนุมวิชาการ", target: "ม.ปลาย", periods: 1 },
+                    { name: "PLC", target: "ม.ปลาย", periods: 2 },
+                    { name: "โฮมรูม", target: "ม.ปลาย", periods: 2 }
+                ]
+            },
+            {
+                id: 7,
+                name: "นายวัชรากร วงศ์ตาผา",
+                totalCredits: 17,
+                totalPeriods: 24,
+                subjects: [
+                    { code: "ว30225", name: "เคมี 5", credits: 1.5, classes: "ม.6/1, 6/2", periods: 6 },
+                    { code: "ว30226", name: "เคมี 6", credits: 1.5, classes: "ม.6/5", periods: 3 },
+                    { code: "ว120202", name: "การศึกษาด้วยตนเอง 2", credits: 1.0, classes: "ม.2/3-2/6", periods: 8 }
+                ],
+                activities: [
+                    { name: "กิจกรรมแนะแนว", target: "ม.ปลาย", periods: 1 },
+                    { name: "กิจกรรมลูกเสือ", target: "ม.ปลาย", periods: 1 },
+                    { name: "ชุมนุมวิชาการ", target: "ม.ปลาย", periods: 1 },
+                    { name: "PLC", target: "ม.ปลาย", periods: 2 },
+                    { name: "โฮมรูม", target: "ม.ปลาย", periods: 2 }
+                ]
+            },
+            {
+                id: 8,
+                name: "นายอำพล พรมสำลี",
+                totalCredits: 15,
+                totalPeriods: 22,
+                subjects: [
+                    { code: "ว230222", name: "เคมี 2", credits: 1.5, classes: "ม.4/1, 4/2, 4/4", periods: 9 },
+                    { code: "ว130224", name: "เคมี 4", credits: 1.5, classes: "ม.5/1, 5/2", periods: 6 }
+                ],
+                activities: [
+                    { name: "กิจกรรมแนะแนว", target: "ม.ปลาย", periods: 1 },
+                    { name: "กิจกรรมลูกเสือ", target: "ม.ปลาย", periods: 1 },
+                    { name: "ชุมนุมวิชาการ", target: "ม.ปลาย", periods: 1 },
+                    { name: "PLC", target: "ม.ปลาย", periods: 2 },
+                    { name: "โฮมรูม", target: "ม.ปลาย", periods: 2 }
+                ]
+            },
+            {
+                id: 9,
+                name: "นางสาวสมเพียร เจาจาลึก",
+                totalCredits: 15,
+                totalPeriods: 24,
+                subjects: [
+                    { code: "ว30244", name: "ชีววิทยา 4", credits: 1.5, classes: "ม.5/1,5/2", periods: 6 },
+                    { code: "ว230245", name: "ชีววิทยา 5", credits: 1.5, classes: "ม.6/1,6/2", periods: 6 },
+                    { code: "ว230246", name: "ชีววิทยา 6", credits: 1.5, classes: "ม.6/5", periods: 3 }
+                ],
+                activities: [
+                    { name: "กิจกรรมแนะแนว", target: "ม.ปลาย", periods: 1 },
+                    { name: "กิจกรรมลูกเสือ", target: "ม.ปลาย", periods: 1 },
+                    { name: "PLC", target: "ม.ปลาย", periods: 1 },
+                    { name: "ชุมนุมวิชาการ/โฮมรูม", target: "ม.ปลาย", periods: 4 }
+                ]
+            },
+            {
+                id: 10,
+                name: "นายศรทอง รูปสม",
+                totalCredits: 15,
+                totalPeriods: 22,
+                subjects: [
+                    { code: "ว230242", name: "ชีววิทยา 2", credits: 1.5, classes: "ม.4/1,4/2,4/4", periods: 9 },
+                    { code: "ว230242", name: "ชีววิทยา 2", credits: 1.0, classes: "ม.1/5", periods: 2 },
+                    { code: "ว230262", name: "โลก ดาราศาสตร์ฯ 2", credits: 0.5, classes: "ม.4/1,4/2,4/4", periods: 3 }
+                ],
+                activities: [
+                    { name: "กิจกรรมแนะแนว", target: "ม.ปลาย", periods: 1 },
+                    { name: "กิจกรรมลูกเสือ", target: "ม.ปลาย", periods: 1 },
+                    { name: "ชุมนุมวิชาการ", target: "ม.ปลาย", periods: 1 },
+                    { name: "PLC", target: "ม.ปลาย", periods: 2 },
+                    { name: "โฮมรูม", target: "ม.ปลาย", periods: 2 }
+                ]
+            },
+            {
+                id: 11,
+                name: "นางสาวขนิษฐา ฤทธิธาดา",
+                totalCredits: 20,
+                totalPeriods: 27,
+                subjects: [
+                    { code: "ว230285", name: "ออกแบบสื่อ 2", credits: 1.0, classes: "ม.6/1-6/4", periods: 8 },
+                    { code: "ว130283", name: "กราฟิกอะนิเมชั่น", credits: 1.0, classes: "ม.5/1-5/3", periods: 6 },
+                    { code: "ว232282", name: "การออกแบบโมเดล 3D", credits: 1.0, classes: "ม.4/1-4/3", periods: 6 }
+                ],
+                activities: [
+                    { name: "กิจกรรมแนะแนว", target: "ม.ปลาย", periods: 1 },
+                    { name: "กิจกรรมลูกเสือ", target: "ม.ปลาย", periods: 1 },
+                    { name: "ชุมนุมวิชาการ", target: "ม.ปลาย", periods: 1 },
+                    { name: "PLC", target: "ม.ปลาย", periods: 2 },
+                    { name: "โฮมรูม", target: "ม.ปลาย", periods: 2 }
+                ]
+            },
+            {
+                id: 12,
+                name: "นางจิราภรณ์ พลศรีราช",
+                totalCredits: 18,
+                totalPeriods: 25,
+                subjects: [
+                    { code: "ว22104", name: "การออกแบบและเทคโนโลยี4", credits: 0.5, classes: "ม.2/1-2/6", periods: 6 },
+                    { code: "ว23104", name: "วิทยการคำนวณ 3", credits: 0.5, classes: "ม.3/1-3/6", periods: 6 },
+                    { code: "ว220286", name: "วิทยาการคำนวณ 6", credits: 0.5, classes: "ม.3/1-3/6", periods: 6 }
+                ],
+                activities: [
+                    { name: "กิจกรรมแนะแนว", target: "ม.ต้น", periods: 1 },
+                    { name: "กิจกรรมลูกเสือ", target: "ม.ต้น", periods: 1 },
+                    { name: "ชุมนุมวิชาการ", target: "ม.ต้น", periods: 1 },
+                    { name: "PLC", target: "ม.ต้น", periods: 2 },
+                    { name: "โฮมรูม", target: "ม.ต้น", periods: 2 }
+                ]
+            },
+            {
+                id: 13,
+                name: "นายคณาธิป วงค์ตาโสม",
+                totalCredits: 11,
+                totalPeriods: 18,
+                subjects: [
+                    { code: "ว221104", name: "วิทยาการคำนวณ 1", credits: 0.5, classes: "ม.1/1-1/6", periods: 6 },
+                    { code: "ว31103", name: "การออกแบบและเทคโนโลยี 1", credits: 0.5, classes: "ม.4/1-4/4", periods: 4 },
+                    { code: "ส21202", name: "การป้องกันทุจริต ๒", credits: 0.5, classes: "ม.1/5", periods: 1 }
+                ],
+                activities: [
+                    { name: "กิจกรรมแนะแนว", target: "ม.", periods: 1 },
+                    { name: "กิจกรรมลูกเสือ", target: "ม.", periods: 1 },
+                    { name: "ชุมนุมวิชาการ", target: "ม.", periods: 1 },
+                    { name: "PLC", target: "ม.", periods: 2 },
+                    { name: "โฮมรูม", target: "ม.", periods: 2 }
+                ]
+            }
+        ];
+
+        // Component สำหรับแสดงหน้าต่างรายละเอียดตารางสอน
+        const TeacherModal = ({ teacher, onClose }) => {
+            if (!teacher) return null;
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 modal-overlay backdrop-blur-sm" onClick={onClose}>
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden modal-content" onClick={e => e.stopPropagation()}>
+                        
+                        {/* Modal Header */}
+                        <div className="flex justify-between items-center p-5 border-b bg-slate-50">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shadow-sm border border-blue-200">
+                                    <i className="fa-solid fa-chalkboard-user text-xl"></i>
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-slate-800">{teacher.name}</h2>
+                                    <p className="text-sm text-slate-500">ข้อมูลภาระงานสอน ภาคเรียนที่ 2</p>
+                                </div>
+                            </div>
+                            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 transition-colors text-slate-500">
+                                <i className="fa-solid fa-xmark text-lg"></i>
+                            </button>
+                        </div>
+
+                        {/* Modal Body (Scrollable) */}
+                        <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+                            
+                            {/* Summary Badges */}
+                            <div className="flex flex-wrap gap-4 mb-6">
+                                <div className="bg-blue-50 px-4 py-3 rounded-lg border border-blue-100 flex-1 min-w-[150px]">
+                                    <p className="text-sm text-blue-600 font-medium mb-1">รวมคาบที่มีหน่วยกิต</p>
+                                    <p className="text-2xl font-bold text-blue-800">{teacher.totalCredits} <span className="text-sm font-normal">คาบ</span></p>
+                                </div>
+                                <div className="bg-emerald-50 px-4 py-3 rounded-lg border border-emerald-100 flex-1 min-w-[150px]">
+                                    <p className="text-sm text-emerald-600 font-medium mb-1">รวมคาบทั้งหมด (รวมกิจกรรม)</p>
+                                    <p className="text-2xl font-bold text-emerald-800">{teacher.totalPeriods} <span className="text-sm font-normal">คาบ/สัปดาห์</span></p>
+                                </div>
+                            </div>
+
+                            {/* Subjects Table */}
+                            <h3 className="text-lg font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                                <i className="fa-solid fa-book-open text-blue-500"></i> รายวิชาที่สอน (มีหน่วยกิต)
+                            </h3>
+                            <div className="overflow-x-auto rounded-xl border border-slate-200 mb-8">
+                                <table className="w-full text-left border-collapse whitespace-nowrap">
+                                    <thead>
+                                        <tr className="bg-slate-100 text-slate-600 text-sm">
+                                            <th className="p-3 border-b font-semibold">รหัสวิชา</th>
+                                            <th className="p-3 border-b font-semibold">ชื่อวิชา</th>
+                                            <th className="p-3 border-b font-semibold text-center">หน่วยกิต</th>
+                                            <th className="p-3 border-b font-semibold">ระดับชั้น</th>
+                                            <th className="p-3 border-b font-semibold text-center">จำนวนคาบ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {teacher.subjects.map((sub, idx) => (
+                                            <tr key={idx} className="hover:bg-slate-50 border-b last:border-0 transition-colors">
+                                                <td className="p-3 text-slate-700">{sub.code}</td>
+                                                <td className="p-3 text-slate-800 font-medium">{sub.name}</td>
+                                                <td className="p-3 text-slate-600 text-center">{sub.credits.toFixed(1)}</td>
+                                                <td className="p-3 text-slate-600">{sub.classes}</td>
+                                                <td className="p-3 text-blue-600 font-bold text-center">{sub.periods}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Activities Table */}
+                            <h3 className="text-lg font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                                <i className="fa-solid fa-users text-orange-500"></i> กิจกรรมพัฒนาผู้เรียน / ภาระงานอื่น
+                            </h3>
+                            <div className="overflow-x-auto rounded-xl border border-slate-200">
+                                <table className="w-full text-left border-collapse whitespace-nowrap">
+                                    <thead>
+                                        <tr className="bg-slate-100 text-slate-600 text-sm">
+                                            <th className="p-3 border-b font-semibold">ชื่อกิจกรรม</th>
+                                            <th className="p-3 border-b font-semibold">ระดับชั้น/กลุ่มเป้าหมาย</th>
+                                            <th className="p-3 border-b font-semibold text-center">จำนวนคาบ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {teacher.activities.map((act, idx) => (
+                                            <tr key={idx} className="hover:bg-slate-50 border-b last:border-0 transition-colors">
+                                                <td className="p-3 text-slate-800">{act.name}</td>
+                                                <td className="p-3 text-slate-600">{act.target}</td>
+                                                <td className="p-3 text-orange-600 font-bold text-center">{act.periods}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                        
+                        {/* Modal Footer */}
+                        <div className="p-4 border-t bg-slate-50 text-right">
+                            <button 
+                                onClick={onClose}
+                                className="px-6 py-2 bg-slate-800 text-white font-medium rounded-lg hover:bg-slate-700 transition-colors shadow-sm"
+                            >
+                                ปิดหน้าต่าง
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Component สำหรับการ์ดสรุปข้อมูลครูแต่ละคนในหน้าหลัก
+        const TeacherCard = ({ teacher, onClick }) => {
+            // เช็คว่าสอนเยอะไปไหม (เกิน 25 คาบให้เป็นสีแดงเตือน)
+            const isHeavyLoad = teacher.totalPeriods > 25;
+            const periodColor = isHeavyLoad ? 'text-red-600 bg-red-50 border-red-200' : 'text-emerald-700 bg-emerald-50 border-emerald-100';
+
+            return (
+                <div 
+                    onClick={() => onClick(teacher)}
+                    className="bg-white rounded-2xl shadow-sm hover:shadow-md border border-slate-200 p-5 cursor-pointer transition-all hover:-translate-y-1 group"
+                >
+                    <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center text-blue-600 font-bold text-lg border border-blue-100 shadow-inner group-hover:scale-110 transition-transform">
+                                {teacher.name.charAt(0)}
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-slate-800 text-lg leading-tight group-hover:text-blue-600 transition-colors">{teacher.name}</h3>
+                                <p className="text-xs text-slate-500 mt-1">กลุ่มสาระฯ วิทยาศาสตร์และเทคโนโลยี</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <p className="text-xs text-slate-500 mb-1">วิชาที่สอน</p>
+                            <p className="font-semibold text-slate-700">{teacher.subjects.length} วิชา</p>
+                        </div>
+                        <div className={`p-3 rounded-xl border ${periodColor}`}>
+                            <p className="text-xs opacity-80 mb-1">รวมภาระงาน (คาบ)</p>
+                            <p className="font-bold text-lg">{teacher.totalPeriods}</p>
+                        </div>
+                    </div>
+
+                    <div className="border-t pt-3 flex items-center justify-between text-sm text-blue-600 font-medium">
+                        <span>ดูตารางสอนแบบละเอียด</span>
+                        <i className="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </div>
+            );
+        };
+
+        // Component หลักของระบบ
+        const App = () => {
+            const [searchQuery, setSearchQuery] = React.useState("");
+            const [selectedTeacher, setSelectedTeacher] = React.useState(null);
+
+            // กรองข้อมูลครูตามคำค้นหา (ชื่อ หรือ ชื่อวิชา)
+            const filteredTeachers = teachersData.filter(teacher => {
+                const query = searchQuery.toLowerCase();
+                const matchName = teacher.name.toLowerCase().includes(query);
+                const matchSubject = teacher.subjects.some(sub => sub.name.toLowerCase().includes(query));
+                return matchName || matchSubject;
+            });
+
+            // คำนวณสถิติรวม
+            const totalTeachers = teachersData.length;
+            const totalPeriodsAll = teachersData.reduce((sum, t) => sum + t.totalPeriods, 0);
+            const avgPeriods = (totalPeriodsAll / totalTeachers).toFixed(1);
+
+            return (
+                <div className="min-h-screen flex flex-col pb-12">
+                    {/* Header Banner */}
+                    <header className="bg-slate-800 text-white pt-10 pb-20 px-6 sm:px-8 shadow-lg relative overflow-hidden">
+                        {/* Decorative Background Elements */}
+                        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-10">
+                            <i className="fa-solid fa-atom absolute -top-10 -right-10 text-9xl"></i>
+                            <i className="fa-solid fa-flask absolute top-20 left-10 text-8xl"></i>
+                        </div>
+
+                        <div className="max-w-6xl mx-auto relative z-10">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                <div>
+                                    <div className="inline-block bg-blue-500/20 text-blue-200 text-xs font-semibold px-3 py-1 rounded-full mb-3 border border-blue-400/30">
+                                        ภาคเรียนที่ 2 / 2569
+                                    </div>
+                                    <h1 className="text-3xl md:text-4xl font-bold mb-2">แดชบอร์ดสรุปภาระงานสอน</h1>
+                                    <p className="text-slate-300 text-lg">กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี</p>
+                                </div>
+                                
+                                {/* Search Box */}
+                                <div className="w-full md:w-80 relative">
+                                    <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                    <input 
+                                        type="text" 
+                                        placeholder="ค้นหาชื่อครู หรือ ชื่อรายวิชา..." 
+                                        className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white/20 transition-all backdrop-blur-sm"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Content Area */}
+                    <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 md:px-8 -mt-10 relative z-20">
+                        
+                        {/* Stats Row */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 text-xl">
+                                    <i className="fa-solid fa-users"></i>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-slate-500 font-medium">จำนวนครูทั้งหมด (ในระบบ)</p>
+                                    <p className="text-2xl font-bold text-slate-800">{totalTeachers} <span className="text-base font-normal text-slate-500">ท่าน</span></p>
+                                </div>
+                            </div>
+                            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 text-xl">
+                                    <i className="fa-solid fa-clock"></i>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-slate-500 font-medium">รวมคาบสอนทั้งหมวด</p>
+                                    <p className="text-2xl font-bold text-slate-800">{totalPeriodsAll} <span className="text-base font-normal text-slate-500">คาบ</span></p>
+                                </div>
+                            </div>
+                            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 text-xl">
+                                    <i className="fa-solid fa-chart-pie"></i>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-slate-500 font-medium">เฉลี่ยภาระงานสอน</p>
+                                    <p className="text-2xl font-bold text-slate-800">{avgPeriods} <span className="text-base font-normal text-slate-500">คาบ/ท่าน</span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Teachers Grid */}
+                        <div className="mb-6 flex justify-between items-end">
+                            <h2 className="text-xl font-bold text-slate-800 border-l-4 border-blue-500 pl-3">รายชื่อครูผู้สอน</h2>
+                            <p className="text-sm text-slate-500">แสดง {filteredTeachers.length} รายการ</p>
+                        </div>
+
+                        {filteredTeachers.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                                {filteredTeachers.map(teacher => (
+                                    <TeacherCard 
+                                        key={teacher.id} 
+                                        teacher={teacher} 
+                                        onClick={setSelectedTeacher}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-slate-200">
+                                <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300 text-3xl">
+                                    <i className="fa-solid fa-search"></i>
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-700 mb-1">ไม่พบข้อมูล</h3>
+                                <p className="text-slate-500">ไม่มีรายชื่อครูหรือวิชาที่ตรงกับคำค้นหา "{searchQuery}"</p>
+                                <button 
+                                    onClick={() => setSearchQuery('')}
+                                    className="mt-4 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors font-medium text-sm"
+                                >
+                                    ล้างคำค้นหา
+                                </button>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="mt-auto py-6 text-center text-slate-400 text-sm">
+                        <p>จัดทำข้อมูลตามเอกสารมอบหมายการสอน กลุ่มสาระฯ วิทยาศาสตร์และเทคโนโลยี</p>
+                    </footer>
+
+                    {/* Teacher Detail Modal */}
+                    <TeacherModal 
+                        teacher={selectedTeacher} 
+                        onClose={() => setSelectedTeacher(null)} 
+                    />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
